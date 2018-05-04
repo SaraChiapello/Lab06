@@ -45,10 +45,10 @@ public class Model {
 
 	public String trovaSequenza(int mese) {
 		String sequenza="";
-		for(Citta c:listaCitta()) {
-//			c.setRilevamenti(getAllRilevamentiMese15(mese));
-			System.out.println(c.getRilevamenti().toString());
-		}
+//		for(Citta c:listaCitta()) {
+//			c.setRilevamenti(MDAO.getAllRilevamentiLocalitaMese15(mese,c.getNome()));
+//			System.out.println(c.getRilevamenti().toString());
+//		}
 		List<SimpleCity> parziale=new ArrayList<SimpleCity>();
 		
 		List<SimpleCity> candidata=new ArrayList<SimpleCity>();
@@ -60,8 +60,7 @@ public class Model {
 
 
 	private void calcola(List<SimpleCity> parziale, int mese, int passo, List<SimpleCity> candidata) {
-		// TODO Auto-generated method stub
-		
+	
 		if(passo==15) {
 			if(controllaParziale(parziale)) {
 				
@@ -74,18 +73,18 @@ public class Model {
 				
 			return;
 		}
+	
 		for(int i=0;i<15;i++) {
 
-			for(int j=0;j<3;j++) {
-
-				if(listaCitta().get(j).getCounter()<=6){
-					System.out.println(listaCitta().get(j).getNome());
-					System.out.println(listaCitta().get(j).getRilevamenti().get(i).getUmidita());
-				parziale.add(new SimpleCity(listaCitta().get(j).getNome(),listaCitta().get(j).getRilevamenti().get(i).getUmidita()));
-
-				listaCitta().get(j).increaseCounter();
+			for(Citta c:listaCitta()) {
+				c.setRilevamenti(MDAO.getAllRilevamentiLocalitaMese15(mese,c.getNome()));
+				if(c.getCounter()<=6){
+				parziale.add(new SimpleCity(c.getNome(),c.getRilevamenti().get(i).getUmidita()));
+				System.out.println(parziale);
+				c.increaseCounter();
 				calcola(parziale, mese, passo+1, candidata);
 				parziale.subList(0, parziale.size()-1);
+				c.decreaseCounter();
 				}
 			}
 		}
