@@ -18,12 +18,15 @@ public class Model {
 	private final static int NUMERO_GIORNI_CITTA_MAX = 6;
 	private final static int NUMERO_GIORNI_TOTALI = 15;
 	private MeteoDAO MDAO;
+	private Citta citta;
 	private double costoMinimo=1500.0;
 	public Model() {
 		MDAO=new MeteoDAO();
+		
 	}
 	
 	public List<Citta> listaCitta(){
+		
 		return MDAO.listaCitta();
 	}
 
@@ -45,10 +48,14 @@ public class Model {
 
 	public String trovaSequenza(int mese) {
 		String sequenza="";
-//		for(Citta c:listaCitta()) {
-//			c.setRilevamenti(MDAO.getAllRilevamentiLocalitaMese15(mese,c.getNome()));
-//			System.out.println(c.getRilevamenti().toString());
-//		}
+		for(Citta c:listaCitta()) {
+			c=new Citta(c.getNome());
+			c.setRilevamenti(MDAO.getAllRilevamentiLocalitaMese15(mese,c.getNome()));
+			System.out.println(c.getRilevamenti());
+		}
+		System.out.println(listaCitta().get(0).getNome());
+
+			System.out.println(listaCitta().get(0).getRilevamenti());
 		List<SimpleCity> parziale=new ArrayList<SimpleCity>();
 		
 		List<SimpleCity> candidata=new ArrayList<SimpleCity>();
@@ -60,8 +67,8 @@ public class Model {
 
 
 	private void calcola(List<SimpleCity> parziale, int mese, int passo, List<SimpleCity> candidata) {
-	
-		if(passo==15) {
+		
+		if(parziale.size()==15) {
 			if(controllaParziale(parziale)) {
 				
 				if(punteggioSoluzione(parziale)<costoMinimo) {
@@ -78,15 +85,20 @@ public class Model {
 
 			for(Citta c:listaCitta()) {
 				c.setRilevamenti(MDAO.getAllRilevamentiLocalitaMese15(mese,c.getNome()));
+				System.out.println(c.getCounter());
 				if(c.getCounter()<=6){
-				parziale.add(new SimpleCity(c.getNome(),c.getRilevamenti().get(i).getUmidita()));
-				System.out.println(parziale);
-				c.increaseCounter();
-				calcola(parziale, mese, passo+1, candidata);
-				parziale.subList(0, parziale.size()-1);
-				c.decreaseCounter();
+					parziale.add(new SimpleCity(c.getNome(),c.getRilevamenti().get(i).getUmidita()));
+					System.out.println(parziale);
+					c.increaseCounter();
+					calcola(parziale, mese, passo+1, candidata);
+//					parziale.subList(0, parziale.size()-1);
+//					c.decreaseCounter();
 				}
+				
 			}
+//			parziale.subList(0, parziale.size()-1);
+//			c.decreaseCounter();
+			
 		}
 	}
 
