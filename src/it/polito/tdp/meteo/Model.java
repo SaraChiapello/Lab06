@@ -55,7 +55,7 @@ public class Model {
 		
 		cerca(parziale,0);
 //		sequenza=candidata.toString();
-		return best.toString();
+		return best.toString();//+" "+punteggioSoluzione(best);
 	}
 
 
