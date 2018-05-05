@@ -53,7 +53,7 @@ public class Model {
 			c.setRilevamenti(MDAO.getAllRilevamentiLocalitaMese15(mese,c.getNome()));
 			System.out.println(c.getRilevamenti());
 		}
-		System.out.println(listaCitta().get(0).getNome());
+		System.out.println(listaCitta().get(0));
 
 			System.out.println(listaCitta().get(0).getRilevamenti());
 		List<SimpleCity> parziale=new ArrayList<SimpleCity>();
