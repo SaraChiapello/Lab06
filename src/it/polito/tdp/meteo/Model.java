@@ -51,94 +51,89 @@ public class Model {
 			c.setRilevamenti(MDAO.getAllRilevamentiLocalitaMese15(mese,c.getNome()));
 		
 		}
-
-		List<SimpleCity> parziale=new ArrayList<SimpleCity>();
+		List<Citta> parziale=new ArrayList<Citta>();
 		
-		List<SimpleCity> candidata=new ArrayList<SimpleCity>();
-		calcola(parziale,mese,0,candidata);
-		sequenza=candidata.toString();
-		return sequenza;
+		cerca(parziale,0);
+//		sequenza=candidata.toString();
+		return best.toString();
 	}
 
 
 
-	private void calcola(List<SimpleCity> parziale, int mese, int passo, List<SimpleCity> candidata) {
+	private void cerca(List<Citta> parziale, int livello) {
 		
 		if(parziale.size()==NUMERO_GIORNI_TOTALI) {
-			if(controllaParziale(parziale)) {
-				if(punteggioSoluzione(parziale)<costoMinimo) {
-					costoMinimo=punteggioSoluzione(parziale);
-					candidata.removeAll(candidata);
-					candidata.addAll(parziale);
-				}
+//			System.out.println(parziale);
+			Double costo=punteggioSoluzione(parziale);
+			System.out.println(costo+" "+parziale);
+
+			if(best==null||costo<punteggioSoluzione(best)) {
+
+				best=new ArrayList<>(parziale);
+				System.out.println("migliore   "+parziale);
+
 			}
 			return;
 		}
 	
 		for(Citta c:leCitta) {
-			System.out.println(c.getCounter());
-				if(c.getCounter()<6){
-					parziale.add(new SimpleCity(c.getNome(),c.getRilevamenti().get(parziale.size()).getUmidita()));
-					System.out.println(parziale);
-					c.increaseCounter();
-					calcola(parziale, mese, passo+1, candidata);
-					citta=new Citta(parziale.get(parziale.size()-1).getNome());
-					citta.decreaseCounter();
-					parziale.remove(parziale.get(parziale.size()-1));
-					System.out.println("siamo qua " +parziale);
 
-				}
-				
-			
-			
-//			citta=new Citta(parziale.get(parziale.size()-1).getNome());
-//			citta.decreaseCounter();
-//			parziale.subList(0, parziale.size()-2);
-		
-//			System.out.println("siamo qua " +parziale);
-
+			if(aggiuntaValida(c,parziale)) {
+				parziale.add(c);
+				cerca(parziale,livello+1);
+				parziale.remove(parziale.size()-1);
+			}
 		
 		}
 	}
 
-	private Double punteggioSoluzione(List<SimpleCity> soluzioneCandidata) {
+	private boolean aggiuntaValida(Citta c, List<Citta> parziale) {
+		// TODO Auto-generated method stub
+		int count=0;
+		if(parziale.size()==0)
+			return true;
+		int i=parziale.size()-1;
+		for(Citta l:parziale) {
+			if(c.equals(l))
+				count++;
+			
+			
+		}
+		if(count>=NUMERO_GIORNI_CITTA_MAX)
+			return false;
+
+		if(i<3 )
+			return parziale.get(0).equals(c);
+		if(i==13||i==12) //così ho considerato che anche al giorno 15 debba essere il terzo giorno dello stesso posto
+			return parziale.get(i).equals(c);
+		if(parziale.get(i).equals(parziale.get(i-1)) &&parziale.get(i).equals(parziale.get(i-2)))
+			return true;
+		if(parziale.get(i).equals(parziale.get(i-1)) &&!parziale.get(i).equals(parziale.get(i-2)))
+			return parziale.get(i).equals(c);
+		if(parziale.get(i).equals(c))
+			return true;
+		
+		return false;
+	}
+
+
+
+
+	private Double punteggioSoluzione(List<Citta> soluzioneCandidata) {
 		double score = 0.0;
 //		for(SimpleCity s:soluzioneCandidata) {
 //			score+=s.getCosto();
 //			
 //		}
 		for(int i=0;i<NUMERO_GIORNI_TOTALI;i++) {
-			score+=soluzioneCandidata.get(i).getCosto();
-			if(i!=NUMERO_GIORNI_TOTALI-1 && soluzioneCandidata.get(i).getNome().equals(soluzioneCandidata.get(i+1).getNome()))
+			score+=soluzioneCandidata.get(i).getRilevamenti().get(i).getUmidita();
+			if(i!=NUMERO_GIORNI_TOTALI-1 && !soluzioneCandidata.get(i).getNome().equals(soluzioneCandidata.get(i+1).getNome()))
 				score+=100;
 		}
 			
 		return score;
 	}
 
-	private boolean controllaParziale(List<SimpleCity> parziale) {
-		int count=0;
-		List<String> lista=new ArrayList<String>();
-
-		for(int i=0;i<12;i++) {
-			if(!lista.contains(parziale.get(i).getNome())) {
-				count=1;
-				if(parziale.get(i).getNome().equals(parziale.get(i+1).getNome())) {
-					count=2;
-					if(parziale.get(i).getNome().equals(parziale.get(i+2).getNome())) {
-						count=3;
-						lista.add(parziale.get(i).getNome());
-						i+=1;
-					}
-					i++;
-				}
-			}
-		}
-		if(lista.size()==3)
-			return true;
-		else
-			return false;
-	}
-
+	
 
 }
