@@ -19,16 +19,15 @@ public class Model {
 	private final static int NUMERO_GIORNI_TOTALI = 15;
 	private MeteoDAO MDAO;
 	private Citta citta;
+	private List<Citta> leCitta;
+	private List<Citta> best;
 	private double costoMinimo=1500.0;
 	public Model() {
 		MDAO=new MeteoDAO();
-		
+		this.leCitta=MDAO.listaCitta();
 	}
 	
-	public List<Citta> listaCitta(){
-		
-		return MDAO.listaCitta();
-	}
+
 
 
 	public String getUmiditaMedia(int mese) {
@@ -48,14 +47,11 @@ public class Model {
 
 	public String trovaSequenza(int mese) {
 		String sequenza="";
-		for(Citta c:listaCitta()) {
-			c=new Citta(c.getNome());
+		for(Citta c:leCitta) {
 			c.setRilevamenti(MDAO.getAllRilevamentiLocalitaMese15(mese,c.getNome()));
-			System.out.println(c.getRilevamenti());
+		
 		}
-		System.out.println(listaCitta().get(0));
 
-			System.out.println(listaCitta().get(0).getRilevamenti());
 		List<SimpleCity> parziale=new ArrayList<SimpleCity>();
 		
 		List<SimpleCity> candidata=new ArrayList<SimpleCity>();
@@ -68,44 +64,55 @@ public class Model {
 
 	private void calcola(List<SimpleCity> parziale, int mese, int passo, List<SimpleCity> candidata) {
 		
-		if(parziale.size()==15) {
+		if(parziale.size()==NUMERO_GIORNI_TOTALI) {
 			if(controllaParziale(parziale)) {
-				
 				if(punteggioSoluzione(parziale)<costoMinimo) {
 					costoMinimo=punteggioSoluzione(parziale);
 					candidata.removeAll(candidata);
 					candidata.addAll(parziale);
 				}
 			}
-				
 			return;
 		}
 	
-		for(int i=0;i<15;i++) {
-
-			for(Citta c:listaCitta()) {
-				c.setRilevamenti(MDAO.getAllRilevamentiLocalitaMese15(mese,c.getNome()));
-				System.out.println(c.getCounter());
-				if(c.getCounter()<=6){
-					parziale.add(new SimpleCity(c.getNome(),c.getRilevamenti().get(i).getUmidita()));
+		for(Citta c:leCitta) {
+			System.out.println(c.getCounter());
+				if(c.getCounter()<6){
+					parziale.add(new SimpleCity(c.getNome(),c.getRilevamenti().get(parziale.size()).getUmidita()));
 					System.out.println(parziale);
 					c.increaseCounter();
 					calcola(parziale, mese, passo+1, candidata);
-//					parziale.subList(0, parziale.size()-1);
-//					c.decreaseCounter();
+					citta=new Citta(parziale.get(parziale.size()-1).getNome());
+					citta.decreaseCounter();
+					parziale.remove(parziale.get(parziale.size()-1));
+					System.out.println("siamo qua " +parziale);
+
 				}
 				
-			}
-//			parziale.subList(0, parziale.size()-1);
-//			c.decreaseCounter();
 			
+			
+//			citta=new Citta(parziale.get(parziale.size()-1).getNome());
+//			citta.decreaseCounter();
+//			parziale.subList(0, parziale.size()-2);
+		
+//			System.out.println("siamo qua " +parziale);
+
+		
 		}
 	}
 
 	private Double punteggioSoluzione(List<SimpleCity> soluzioneCandidata) {
 		double score = 0.0;
-		for(SimpleCity s:soluzioneCandidata)
-			score+=s.getCosto();
+//		for(SimpleCity s:soluzioneCandidata) {
+//			score+=s.getCosto();
+//			
+//		}
+		for(int i=0;i<NUMERO_GIORNI_TOTALI;i++) {
+			score+=soluzioneCandidata.get(i).getCosto();
+			if(i!=NUMERO_GIORNI_TOTALI-1 && soluzioneCandidata.get(i).getNome().equals(soluzioneCandidata.get(i+1).getNome()))
+				score+=100;
+		}
+			
 		return score;
 	}
 
